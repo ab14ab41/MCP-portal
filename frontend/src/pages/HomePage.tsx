@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Sparkles } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import ProjectCard from '@/components/projects/ProjectCard';
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { useProjects, useDeleteProject } from '@/hooks/useProjects';
 
 function HomePage() {
+  const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { data: projects, isLoading, error } = useProjects({ search: searchQuery || undefined });
@@ -46,6 +48,7 @@ function HomePage() {
               Create Project
             </Button>
             <Button
+              onClick={() => navigate('/documentation')}
               variant="outline"
               size="lg"
               className="h-12 px-8 font-semibold rounded-full"
