@@ -934,6 +934,11 @@ Response: 200 OK
 Edit `backend/.env`:
 
 ```env
+# App Settings
+DEBUG=True
+LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+MAX_UPLOAD_SIZE=10485760  # 10MB
+
 # Database
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/mcp_generator
 
@@ -945,12 +950,24 @@ ANTHROPIC_API_KEY=sk-ant-xxxxx
 OPENAI_API_KEY=sk-xxxxx
 OPENAI_BASE_URL=https://api.openai.com/v1
 DEFAULT_AI_PROVIDER=anthropic
-
-# App Settings
-DEBUG=True
-MAX_UPLOAD_SIZE=10485760  # 10MB
-LOG_LEVEL=INFO
 ```
+
+**Configuration Options:**
+
+- **DEBUG**: Enable debug mode (True/False)
+- **LOG_LEVEL**: Set logging verbosity
+  - `DEBUG` - Most verbose, shows all logs including tool schemas and API requests
+  - `INFO` - Standard logging, recommended for production
+  - `WARNING` - Only warnings and errors
+  - `ERROR` - Only errors
+  - `CRITICAL` - Only critical failures
+- **MAX_UPLOAD_SIZE**: Maximum file upload size in bytes (default: 10MB)
+- **DATABASE_URL**: PostgreSQL connection string
+- **CORS_ORIGINS**: Comma-separated list of allowed origins
+- **ANTHROPIC_API_KEY**: Your Anthropic API key (required for Claude AI)
+- **OPENAI_API_KEY**: Your OpenAI API key (optional)
+- **OPENAI_BASE_URL**: OpenAI API endpoint (or compatible service)
+- **DEFAULT_AI_PROVIDER**: Default AI provider ("anthropic" or "openai")
 
 ### Frontend Configuration
 
@@ -1158,13 +1175,28 @@ mcp-portal.example.com {
 
 ### Debug Mode
 
-Enable detailed logging:
+Enable detailed logging to troubleshoot issues:
 
 ```env
 # backend/.env
 DEBUG=True
-LOG_LEVEL=DEBUG
+LOG_LEVEL=DEBUG  # Shows detailed logs including tool schemas and API requests
 ```
+
+**What DEBUG level shows:**
+- All tool schemas sent to AI providers
+- API request/response details
+- Tool execution details
+- Database query logs
+- Detailed error traces
+
+**When to use:**
+- Debugging OpenAI/Anthropic integration issues
+- Investigating tool execution failures
+- Understanding parameter passing to AI models
+- Troubleshooting API connectivity
+
+**Note:** Remember to set `LOG_LEVEL=INFO` or `WARNING` in production to avoid performance impact and log clutter.
 
 View logs:
 ```bash

@@ -205,22 +205,32 @@ Use AI to explore and understand new APIs:
 
 #### Backend (`backend/.env`)
 ```env
+# App Settings
+DEBUG=True
+LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
 # Database
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/mcp_generator
 
 # CORS
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
+# File Upload
+MAX_UPLOAD_SIZE=10485760  # 10MB
+
 # AI Providers
 ANTHROPIC_API_KEY=sk-ant-xxxxx
 OPENAI_API_KEY=sk-xxxxx
 OPENAI_BASE_URL=https://api.openai.com/v1
 DEFAULT_AI_PROVIDER=anthropic
-
-# App Settings
-DEBUG=True
-MAX_UPLOAD_SIZE=10485760  # 10MB
 ```
+
+**Log Levels:**
+- `DEBUG` - Detailed information for diagnosing issues (shows all logs including tool schemas)
+- `INFO` - General informational messages (default, recommended for production)
+- `WARNING` - Warning messages about potential issues
+- `ERROR` - Error messages when something goes wrong
+- `CRITICAL` - Critical errors that may prevent the application from running
 
 #### Frontend
 The frontend automatically connects to `http://localhost:8000` in development. For production, set `VITE_API_URL` in your build environment.

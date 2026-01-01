@@ -2,10 +2,22 @@
 FastAPI main application entry point.
 """
 
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db
+
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, settings.log_level.upper(), logging.INFO),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()]
+)
+
+# Set log level for specific loggers
+logger = logging.getLogger(__name__)
+logger.info(f"Log level set to: {settings.log_level.upper()}")
 
 # Initialize FastAPI app
 app = FastAPI(

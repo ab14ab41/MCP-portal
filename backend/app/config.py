@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     app_name: str = "MCP Portal API"
     app_version: str = "1.0.0"
     debug: bool = True
+    log_level: str = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
 
     # Database
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/mcp_generator"
