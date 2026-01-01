@@ -278,12 +278,25 @@ class AIAgentTesterService:
         """
         openai_functions = []
         for tool in mcp_tools:
+            # Get input_schema (snake_case) or inputSchema (camelCase) for compatibility
+            input_schema = tool.get("input_schema") or tool.get("inputSchema", {})
+
+            # Ensure the parameters schema is valid for OpenAI
+            # OpenAI expects "additionalProperties": false if not specified
+            if input_schema and "additionalProperties" not in input_schema:
+                input_schema = dict(input_schema)  # Make a copy
+                input_schema["additionalProperties"] = False
+
             openai_function = {
                 "type": "function",
                 "function": {
                     "name": tool.get("name"),
                     "description": tool.get("description", ""),
-                    "parameters": tool.get("inputSchema", {})
+                    "parameters": input_schema if input_schema else {
+                        "type": "object",
+                        "properties": {},
+                        "additionalProperties": False
+                    }
                 }
             }
             openai_functions.append(openai_function)
@@ -330,6 +343,10 @@ class AIAgentTesterService:
         # Convert MCP tools to OpenAI function format
         openai_functions = self._convert_mcp_tools_to_openai_functions(mcp_tools or [])
 
+        # Log the converted functions for debugging
+        logger.info(f"Converted {len(openai_functions)} tools for OpenAI")
+        logger.debug(f"OpenAI functions: {json.dumps(openai_functions, indent=2)}")
+
         # Build conversation messages in OpenAI format
         messages = conversation_history or []
         messages.append({
@@ -339,6 +356,7 @@ class AIAgentTesterService:
 
         try:
             # Call OpenAI with the functions
+            logger.info(f"Calling OpenAI model: {model} with {len(openai_functions)} tools")
             response = client.chat.completions.create(
                 model=model,
                 messages=messages,
@@ -401,6 +419,10 @@ class AIAgentTesterService:
         except Exception as e:
             error_msg = str(e)
             logger.error(f"Error testing MCP with OpenAI: {error_msg}")
+            logger.error(f"Model: {model}, Messages count: {len(messages)}, Tools count: {len(openai_functions)}")
+            # Log the first tool for debugging if available
+            if openai_functions:
+                logger.error(f"First tool example: {json.dumps(openai_functions[0], indent=2)}")
             raise
 
     async def execute_tool_and_continue_openai(
