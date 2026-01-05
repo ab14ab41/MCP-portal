@@ -183,7 +183,8 @@ async def generate_mcp_server(
             'path': ep.path,
             'mcp_tool_name': ep.mcp_tool_name,
             'mcp_description': ep.mcp_description,
-            'parameter_configurations': param_configs
+            'parameter_configurations': param_configs,
+            'security_requirements': ep.security_requirements
         })
 
     try:
@@ -484,7 +485,8 @@ async def deploy_mcp_server(
             'path': ep.path,
             'mcp_tool_name': ep.mcp_tool_name,
             'mcp_description': ep.mcp_description,
-            'parameter_configurations': param_configs
+            'parameter_configurations': param_configs,
+            'security_requirements': ep.security_requirements
         })
 
     # Register with serving service

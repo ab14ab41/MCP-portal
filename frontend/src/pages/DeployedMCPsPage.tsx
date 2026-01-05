@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { useDeployedServers, useUndeployMCP, useDeleteMCP } from '@/hooks/useGeneration';
 import { useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { api, getBackendUrl } from '@/lib/api';
 
 function DeployedMCPsPage() {
   const navigate = useNavigate();
@@ -250,13 +250,13 @@ function DeployedMCPsPage() {
                     <div className="text-xs text-muted-foreground">MCP Endpoint:</div>
                     <div className="flex items-center gap-2">
                       <code className="text-xs bg-secondary rounded px-2 py-1 flex-1 truncate">
-                        {server.deployment_url}
+                        {getBackendUrl()}{server.deployment_url}
                       </code>
                       <Button
                         size="sm"
                         variant="ghost"
                         className="h-7 w-7 p-0"
-                        onClick={() => copyToClipboard(`${window.location.origin}${server.deployment_url}`)}
+                        onClick={() => copyToClipboard(`${getBackendUrl()}${server.deployment_url}`)}
                         title="Copy endpoint URL"
                       >
                         <Code className="w-3 h-3" />

@@ -197,15 +197,31 @@ if __name__ == "__main__":
                 - mcp_tool_name: Tool function name
                 - mcp_description: Tool description
                 - parameter_configurations: List of parameter configs
+                - security_requirements: Security requirements info
         """
         method = endpoint.get('http_method', 'GET').upper()
         path = endpoint.get('path', '/')
         tool_name = endpoint.get('mcp_tool_name') or self._generate_tool_name(method, path)
         description = endpoint.get('mcp_description', f'{method} {path}')
         params = endpoint.get('parameter_configurations') or []
+        security = endpoint.get('security_requirements') or {}
 
         # Sanitize tool name
         safe_tool_name = self._sanitize_identifier(tool_name)
+
+        # Add authorization parameter if endpoint requires it
+        if security.get('required', False):
+            auth_param = {
+                'name': 'Authorization',
+                'location': 'header',
+                'description': 'Authorization header (e.g., Bearer token)',
+                'required': True,
+                'user_required': True,
+                'schema': {'type': 'string'}
+            }
+            # Add authorization param if not already in params
+            if not any(p.get('name') == 'Authorization' and p.get('location') == 'header' for p in params):
+                params = [auth_param] + params
 
         # Build function parameters
         func_params = self._build_function_parameters(params)

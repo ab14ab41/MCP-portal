@@ -40,6 +40,7 @@ class TestMessageRequest(BaseModel):
     base_url: Optional[str] = None  # Override base URL (for OpenAI-compatible APIs)
     server_ids: Optional[List[str]] = None  # Optional array of server IDs to combine tools from
     custom_tools: Optional[List[Dict[str, Any]]] = None  # Optional custom tools to use
+    authorization: Optional[str] = None  # Authorization header value (e.g., "Bearer token123")
 
 
 class ToolExecutionRequest(BaseModel):
@@ -52,6 +53,7 @@ class ToolExecutionRequest(BaseModel):
     base_url: Optional[str] = None  # Override base URL (for OpenAI-compatible APIs)
     server_ids: Optional[List[str]] = None  # Optional array of server IDs
     custom_tools: Optional[List[Dict[str, Any]]] = None  # Optional custom tools
+    authorization: Optional[str] = None  # Authorization header value (e.g., "Bearer token123")
 
 
 class TestMessageResponse(BaseModel):
@@ -307,6 +309,20 @@ async def execute_tool(
         tools_response = await get_mcp_tools(server_id, db)
         tools = tools_response["tools"]
 
+    # Inject authorization into tool call arguments if provided
+    tool_call = request.tool_call.copy()
+    if request.authorization:
+        if "input" not in tool_call:
+            tool_call["input"] = {}
+        # Only add Authorization if the tool has it as a parameter
+        tool_name = tool_call.get("name", "")
+        matching_tool = next((t for t in tools if t["name"] == tool_name), None)
+        if matching_tool:
+            tool_schema = matching_tool.get("input_schema", {})
+            tool_properties = tool_schema.get("properties", {})
+            if "Authorization" in tool_properties:
+                tool_call["input"]["Authorization"] = request.authorization
+
     try:
         # Execute tool and continue conversation with selected provider
         if request.provider == "openai":
@@ -314,7 +330,7 @@ async def execute_tool(
             model = request.model or "gpt-4o"
             result = await ai_agent_tester_service.execute_tool_and_continue_openai(
                 server_id=str(server_id),
-                tool_call=request.tool_call,
+                tool_call=tool_call,
                 conversation_history=request.conversation_history,
                 mcp_tools=tools,
                 model=model,
@@ -325,7 +341,7 @@ async def execute_tool(
             # Default to Anthropic Claude
             result = await ai_agent_tester_service.execute_tool_and_continue(
                 server_id=str(server_id),
-                tool_call=request.tool_call,
+                tool_call=tool_call,
                 conversation_history=request.conversation_history,
                 mcp_tools=tools,
                 model=request.model,

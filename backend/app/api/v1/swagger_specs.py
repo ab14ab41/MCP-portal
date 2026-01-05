@@ -367,7 +367,8 @@ async def update_base_url(
                     'path': ep.path,
                     'mcp_tool_name': ep.mcp_tool_name,
                     'mcp_description': ep.mcp_description,
-                    'parameter_configurations': param_configs
+                    'parameter_configurations': param_configs,
+                    'security_requirements': ep.security_requirements
                 })
 
             # Re-register the server with new base URL

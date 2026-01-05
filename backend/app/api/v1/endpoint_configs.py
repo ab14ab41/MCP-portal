@@ -100,7 +100,8 @@ async def initialize_endpoint_configurations(
             mcp_description=None,
             parameter_configurations={"parameters": parameter_configs} if parameter_configs else None,
             request_schema=endpoint.get("request_body"),
-            response_schema=endpoint.get("responses")
+            response_schema=endpoint.get("responses"),
+            security_requirements=endpoint.get("security")
         )
 
         created_config = await endpoint_config_repository.create(db, config)

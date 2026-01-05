@@ -172,6 +172,10 @@ class SwaggerParserService:
         endpoints = []
         version = self.get_spec_version(spec)
 
+        # Extract security schemes from spec
+        security_schemes = self._extract_security_schemes(spec, version)
+        global_security = spec.get("security", [])
+
         for path, path_item in spec.get("paths", {}).items():
             for method in ["get", "post", "put", "delete", "patch", "options", "head"]:
                 if method in path_item:
@@ -184,6 +188,11 @@ class SwaggerParserService:
                     body_params = self._extract_body_parameters(operation, version)
                     parameters.extend(body_params)
 
+                    # Check if endpoint requires authorization
+                    security_info = self._extract_security_requirements(
+                        operation, global_security, security_schemes
+                    )
+
                     endpoint = {
                         "method": method.upper(),
                         "path": path,
@@ -194,7 +203,8 @@ class SwaggerParserService:
                         "parameters": parameters,
                         "request_body": self._extract_request_body(operation, version),
                         "responses": self._extract_responses(operation, version),
-                        "deprecated": operation.get("deprecated", False)
+                        "deprecated": operation.get("deprecated", False),
+                        "security": security_info
                     }
 
                     endpoints.append(endpoint)
@@ -447,6 +457,80 @@ class SwaggerParserService:
             return response_obj.get("schema", {})
 
         return {}
+
+    def _extract_security_schemes(self, spec: Dict[str, Any], version: str) -> Dict[str, Any]:
+        """
+        Extract security schemes from specification.
+
+        Args:
+            spec: Parsed specification dictionary
+            version: OpenAPI version
+
+        Returns:
+            Dictionary of security schemes
+        """
+        if version.startswith("3."):
+            # OpenAPI 3.x: components.securitySchemes
+            components = spec.get("components", {})
+            return components.get("securitySchemes", {})
+        else:
+            # OpenAPI 2.0: securityDefinitions
+            return spec.get("securityDefinitions", {})
+
+    def _extract_security_requirements(
+        self,
+        operation: Dict,
+        global_security: List[Dict[str, List[str]]],
+        security_schemes: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Extract security requirements for an endpoint.
+
+        Args:
+            operation: Operation object
+            global_security: Global security requirements
+            security_schemes: Available security schemes
+
+        Returns:
+            Security information dictionary
+        """
+        # Operation-level security overrides global security
+        security_reqs = operation.get("security", global_security)
+
+        if not security_reqs:
+            return {
+                "required": False,
+                "schemes": []
+            }
+
+        # Parse security requirements
+        schemes = []
+        for req in security_reqs:
+            for scheme_name, scopes in req.items():
+                scheme_def = security_schemes.get(scheme_name, {})
+                scheme_type = scheme_def.get("type", "")
+
+                scheme_info = {
+                    "name": scheme_name,
+                    "type": scheme_type,
+                    "scopes": scopes
+                }
+
+                # Add additional info based on scheme type
+                if scheme_type == "http":
+                    scheme_info["scheme"] = scheme_def.get("scheme", "bearer")
+                elif scheme_type == "apiKey":
+                    scheme_info["in"] = scheme_def.get("in", "header")
+                    scheme_info["key_name"] = scheme_def.get("name", "Authorization")
+                elif scheme_type == "oauth2":
+                    scheme_info["flows"] = scheme_def.get("flows", {})
+
+                schemes.append(scheme_info)
+
+        return {
+            "required": len(schemes) > 0,
+            "schemes": schemes
+        }
 
 
 # Create singleton instance

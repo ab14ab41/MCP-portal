@@ -10,6 +10,7 @@ import { useSwaggerSpec } from '@/hooks/useSwaggerSpec';
 import { useEndpointConfigs, useBatchUpdateEndpointConfigs } from '@/hooks/useEndpointConfig';
 import { useGenerateMCP, useGenerationStatus, useDeployMCP } from '@/hooks/useGeneration';
 import type { EndpointConfigWithDetails, EndpointConfigBatchUpdate } from '@/types/endpoint';
+import { getBackendUrl } from '@/lib/api';
 
 function EndpointSelectionPage() {
   const { specId } = useParams<{ specId: string }>();
@@ -383,7 +384,7 @@ function EndpointSelectionPage() {
                   </p>
                   <div className="bg-white dark:bg-gray-900 rounded-lg p-3 mb-3">
                     <p className="text-xs text-muted-foreground mb-1">Endpoint URL:</p>
-                    <code className="text-xs font-mono break-all">{deploymentUrl}</code>
+                    <code className="text-xs font-mono break-all">{getBackendUrl()}{deploymentUrl}</code>
                   </div>
                   <Button
                     onClick={() => navigate('/deployed-mcps')}

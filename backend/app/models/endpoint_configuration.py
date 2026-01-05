@@ -45,6 +45,10 @@ class EndpointConfiguration(Base, TimestampMixin):
     request_schema: Mapped[Dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     response_schema: Mapped[Dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
 
+    # Security requirements
+    # {required: bool, schemes: [{name, type, scheme, ...}]}
+    security_requirements: Mapped[Dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+
     # Relationships
     swagger_spec: Mapped["SwaggerSpec"] = relationship(
         "SwaggerSpec",

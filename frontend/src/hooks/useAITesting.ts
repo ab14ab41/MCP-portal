@@ -27,6 +27,7 @@ interface TestMessageRequest {
   base_url?: string;
   server_ids?: string[];
   custom_tools?: any[];
+  authorization?: string;
 }
 
 interface ToolCall {
@@ -56,6 +57,7 @@ interface ToolExecutionRequest {
   base_url?: string;
   server_ids?: string[];
   custom_tools?: any[];
+  authorization?: string;
 }
 
 interface ToolExecutionResponse {

@@ -90,8 +90,25 @@ class MCPServingService:
                 endpoint["path"]
             )
 
+            params = endpoint.get("parameter_configurations", [])
+            security = endpoint.get("security_requirements") or {}
+
+            # Add authorization parameter if endpoint requires it
+            if security.get("required", False):
+                auth_param = {
+                    "name": "Authorization",
+                    "location": "header",
+                    "description": "Authorization header (e.g., Bearer token)",
+                    "required": True,
+                    "user_required": True,
+                    "schema": {"type": "string"}
+                }
+                # Add authorization param if not already in params
+                if not any(p.get("name") == "Authorization" and p.get("location") == "header" for p in params):
+                    params = [auth_param] + params
+
             # Build input schema from parameters
-            input_schema = self._build_input_schema(endpoint.get("parameter_configurations", []))
+            input_schema = self._build_input_schema(params)
 
             tools.append({
                 "name": tool_name,
@@ -304,7 +321,8 @@ class MCPServingService:
                         'path': ep.path,
                         'mcp_tool_name': ep.mcp_tool_name,
                         'mcp_description': ep.mcp_description,
-                        'parameter_configurations': param_configs
+                        'parameter_configurations': param_configs,
+                        'security_requirements': ep.security_requirements
                     })
 
                 # Get base URL from swagger spec

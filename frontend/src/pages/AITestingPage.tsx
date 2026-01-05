@@ -36,6 +36,7 @@ function AITestingPage() {
   const [openaiApiKey, setOpenaiApiKey] = useState('');
   const [openaiBaseUrl, setOpenaiBaseUrl] = useState('https://api.openai.com/v1');
   const [showConfig, setShowConfig] = useState(false);
+  const [authorization, setAuthorization] = useState('');
 
   const allServers = deployedData?.servers || [];
 
@@ -103,7 +104,8 @@ function AITestingPage() {
         model: provider === 'openai' ? openaiModel : anthropicModel,
         api_key: provider === 'openai' ? (openaiApiKey || undefined) : (anthropicApiKey || undefined),
         base_url: provider === 'openai' ? openaiBaseUrl : undefined,
-        server_ids: selectedServerIds
+        server_ids: selectedServerIds,
+        authorization: authorization || undefined
       });
 
       // Update conversation history
@@ -130,7 +132,8 @@ function AITestingPage() {
             model: provider === 'openai' ? openaiModel : anthropicModel,
             api_key: provider === 'openai' ? (openaiApiKey || undefined) : (anthropicApiKey || undefined),
             base_url: provider === 'openai' ? openaiBaseUrl : undefined,
-            server_ids: selectedServerIds
+            server_ids: selectedServerIds,
+            authorization: authorization || undefined
           });
 
           // Update conversation history with tool results
@@ -393,6 +396,21 @@ function AITestingPage() {
                       </div>
                     </>
                   )}
+
+                  <div className="space-y-2 pt-4 border-t">
+                    <Label htmlFor="authorization" className="text-xs font-semibold">Authorization (Optional)</Label>
+                    <Input
+                      id="authorization"
+                      type="password"
+                      value={authorization}
+                      onChange={(e) => setAuthorization(e.target.value)}
+                      placeholder="Bearer your-token-here"
+                      className="text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Authorization header for API calls. Auto-injected into all tool calls.
+                    </p>
+                  </div>
 
                   <div className="text-xs text-muted-foreground pt-2 border-t">
                     {provider === 'anthropic'
